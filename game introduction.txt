@@ -1,0 +1,14 @@
+Welcome aboard to a game of Yaniv! these instructions apply to male and female as one :)
+Each player begins of 5 cards, and the goal is to have total ranks of 5 or less.
+every turn a player discards cards in the following manner:
+either a single card, a multiple cards with the same rank, or a 3 or more consecutive cards in the same suit and ascending order (e.g 5-6-7 where 5 is discarded first, 6 second and 7 third)
+afterwards a player draws a card from the deck or the discarded pile, at which point he may 'burst' (pause), and discard the card he just drew in condition that the next player did not made his turn yet.
+Once a player reached a total ranks of 5 or less he may declare YANIV on he's turn. 
+if successful - all the current total ranks of each player will be added to their score table besides the caller.
+However, if a counter ASAF is called by a different player in response, it means that a different player has lower 
+sum of ranks, in which case the YANIV caller gets 30 points addition to his score.
+A player with a score of a 100 or more is out, last player wins the game.
+
+important notes:
+- ACE rank is 1 and it's not consecutive to any other card
+?? Joker rank is 0, and can be used as third (or more if wanted) consecutive card in any case (e.g Joker, 8, 9)
