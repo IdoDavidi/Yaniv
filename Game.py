@@ -62,8 +62,8 @@ class Game:
                 call = input('Do you wish to call YANIV? Y/N').upper()
                 if call == 'Y':
                     print(f'\nYANIV! \tSUCK IT! \n{player.name} has total hand value of {total}')
-                    winner = self.check_for_asaf(player, total)
-                    self.end_round(winner)
+                    winner, asaf_flag, asafed = self.check_for_asaf(player, total)
+                    self.end_round(winner, asaf_flag, asafed)
                     self.new_round()
                     break
                 elif call == 'N':
@@ -80,6 +80,8 @@ class Game:
     def check_for_asaf(self, yaniv_caller, yaniv_caller_hand_score):
         lowest_score = yaniv_caller_hand_score
         winner = yaniv_caller
+        asaf_flag = False
+        asafed = None
         for player in self.players:
             if player != yaniv_caller:
                 player_hand_score = sum(card.value for card in player.hand)
@@ -87,8 +89,10 @@ class Game:
                     lowest_score = player_hand_score
                     winner = player
         if winner != yaniv_caller:
+            asaf_flag = True
+            asafed = yaniv_caller
             print(f'\n FUCKING ASAF! {winner.name} wins the round with a total hand value of{lowest_score}')
-        return winner
+        return winner, asaf_flag, asafed
 
     def new_round(self):
         for player in self.players:
@@ -96,28 +100,33 @@ class Game:
         self.discarded_pile.clear()
         self.deal_cards()
 
-    def end_round(self, winner):
+    def end_round(self, winner, asaf_flag, player_asafed):
         for player in self.players[:]:  # shallow copy of self.players[]
             if player != winner:
                 player_total_hand_value = sum(card.value for card in player.hand)
-                self.table_score[player] += player_total_hand_value
-                if self.table_score[player] > Constants.GAME_OVER:
-                    print(f'{player.name} score is {self.table_score[player]}, they are out')
-                    self.players.remove(player)
-                    self.table_score.pop(player)
-                    # finishing the whole game
-                    if len(self.players) == 1:
-                        print(f'Congrats {self.players[0].name}, you are the winner! I salute you, fame and riches'
-                              f' coming your way')
-                        exit(0)  # should end the game here
-                elif self.table_score[player] == Constants.GAME_OVER:
-                    print(f'{player.name} score is exactly a {self.table_score[player]}, their score is cut by half to'
-                          f' {Constants.CUT_BY_HALF}')
-                    self.table_score[player] = Constants.CUT_BY_HALF
+                if asaf_flag and player == player_asafed:
+                    self.table_score[player] = player_total_hand_value + Constants.ASAF_FINE
                 else:
-                    print(f'{player.name} score is {self.table_score[player]}')
+                    if self.table_score[player] > Constants.GAME_OVER:  # player is out
+                        print(f'{player.name} score is {self.table_score[player]}, they are out')
+                        self.players.remove(player)
+                        self.table_score.pop(player)
+                        # finishing the whole game
+                        if len(self.players) == 1:
+                            print(f'Congrats {self.players[0].name}, you are the winner! I salute you, fame and riches'
+                                  f' coming your way')
+                            exit(0)  # should end the game here
+                    elif self.table_score[player] == Constants.GAME_OVER:  # player has exactly 100 point
+                        print(
+                            f'{player.name} score is exactly a {self.table_score[player]}, their score is cut by half to'
+                            f' {Constants.CUT_BY_HALF}')
+                        self.table_score[player] = Constants.CUT_BY_HALF
+                    else:  # player has less than 100 points
+                        print(f'{player.name} score is {self.table_score[player]}')
             else:
                 print(f'{player.name} score is {self.table_score[player]}')
+
+
 
     def slapdown_option(self, player, card_drew, recent_card_in_discarded_pile):
         if card_drew.eq_ranks(recent_card_in_discarded_pile):
