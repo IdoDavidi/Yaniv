@@ -59,7 +59,7 @@ class Game:
             print(f'\n{player.name} has a total hand value of {total} with:')
             player.show_hand()
             while True and player == self.user:
-                call = input('Do you wish to call YANIV? Y/N').upper()
+                call = input('Do you wish to call YANIV? Y/N\n').upper()
                 if call == 'Y':
                     print(f'\nYANIV! \tSUCK IT! \n{player.name} has total hand value of {total}')
                     winner, asaf_flag, asafed = self.check_for_asaf(player, total)
@@ -91,20 +91,22 @@ class Game:
         if winner != yaniv_caller:
             asaf_flag = True
             asafed = yaniv_caller
-            print(f'\n FUCKING ASAF! {winner.name} wins the round with a total hand value of{lowest_score}')
+            print(f'\nFUCKING ASAF! {winner.name} wins the round with a total hand value of {lowest_score}')
         return winner, asaf_flag, asafed
 
     def new_round(self):
         for player in self.players:
             player.hand.clear()
-        self.discarded_pile.clear()
+        self.deck = Deck()
+        self.deck.shuffle()
+        self.discarded_pile = [self.deck.draw()]
         self.deal_cards()
 
     def end_round(self, winner, asaf_flag, player_asafed):
         for player in self.players[:]:  # shallow copy of self.players[]
             if player != winner:
                 player_total_hand_value = sum(card.value for card in player.hand)
-                if asaf_flag and player == player_asafed:
+                if asaf_flag and player == player_asafed:  # in case ASAF occurred
                     self.table_score[player] = player_total_hand_value + Constants.ASAF_FINE
                 else:
                     if self.table_score[player] > Constants.GAME_OVER:  # player is out
@@ -126,8 +128,6 @@ class Game:
             else:
                 print(f'{player.name} score is {self.table_score[player]}')
 
-
-
     def slapdown_option(self, player, card_drew, recent_card_in_discarded_pile):
         if card_drew.eq_ranks(recent_card_in_discarded_pile):
             print('\nslapdown is optional')
@@ -135,7 +135,7 @@ class Game:
                 try:
                     #  limited time for user to slapdown
                     slap = int(inputimeout('press 0 and then Enter to SLAPDOWN THE SHIT OUT OF THEM',
-                                           lambda: random.randint(2, 5)))
+                                           lambda: random.randint(10, 20)))
                     print(f'slap value is {slap}')
                     if slap == 0:
                         self.discarded_pile.append(player.hand.pop(-1))
