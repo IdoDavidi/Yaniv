@@ -140,8 +140,9 @@ class Game:
             if player == self.user:
                 try:
                     #  limited time for user to slapdown
+                    timeout_val = random.randint(2, 5)
                     slap = int(inputimeout('press 0 and then Enter to SLAPDOWN THE SHIT OUT OF THEM\n',
-                                           10))
+                                           timeout_val))
                     print(f'slap value is {slap}')
                     if slap == 0:
                         self.discarded_pile.append(player.hand.pop(-1))
@@ -151,7 +152,7 @@ class Game:
                     else:
                         print(f'{player.name} gave up the slapdown')
                 except Exception:
-                    print(f"time's up! slapdown missed...")
+                    print(f"time's up! slapdown missed...\n")
             else:
                 r = random.randint(1, 2)  # whether NPC will slap
                 if r == 1:  # NPC will slap
@@ -287,9 +288,12 @@ class Game:
             while True:
                 choose_deck = int(input('Press 1 to draw card from the deck or 2 to draw the last discarded card\n'))
                 if choose_deck == 1:
-                    player.draw(self.deck)
+                    while not player.hand[-1].eq_ranks(self.discarded_pile[-1]):  # added in branch. player draws
+                        # until he can slapdown
+                        player.draw(self.deck)
                     print(f'you drew: {player.hand[-1]} from deck')
                     #  slapdown option
+
                     self.slapdown_option(player, player.hand[-1], self.discarded_pile[-1])
                     break
                 elif choose_deck == 2:
