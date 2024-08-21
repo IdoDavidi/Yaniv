@@ -65,17 +65,19 @@ class Game:
                     winner, asaf_flag, asafed = self.check_for_asaf(player, total)
                     self.end_round(winner, asaf_flag, asafed)
                     self.new_round()
-                    break
+                    return True  # use break
                 elif call == 'N':
                     break
                 else:
                     print('Invalid input')
             else:  # player is an NPC
-                print(f'{player.name} calls YANIV! SUCK IT! {player.name} has total hand value of {total} with')
+                print(f'\n{player.name} calls YANIV! SUCK IT! {player.name} has total hand value of {total} with:')
                 player.show_hand()
-                winner = self.check_for_asaf(player, total)
-                self.end_round(winner)
+                winner, asaf_flag, asafed = self.check_for_asaf(player, total)
+                self.end_round(winner, asaf_flag, asafed)
                 self.new_round()
+                print(f'new round. last card in the discarded pile is: {self.discarded_pile[-1]}')
+                return True # was empty line
 
     def check_for_asaf(self, yaniv_caller, yaniv_caller_hand_score):
         lowest_score = yaniv_caller_hand_score
@@ -106,17 +108,21 @@ class Game:
         for player in self.players[:]:  # shallow copy of self.players[]
             if player != winner:
                 player_total_hand_value = sum(card.value for card in player.hand)
-                if asaf_flag and player == player_asafed:  # in case ASAF occurred
+                self.table_score[player] += player_total_hand_value
+                if asaf_flag and player == player_asafed:  # player got ASAFed
+                    print(f'{player.name} has been ASAFed, therefore they get extra {Constants.ASAF_FINE} points')
                     self.table_score[player] = player_total_hand_value + Constants.ASAF_FINE
-                else:
+                    print(f'{player.name} score is {self.table_score[player]}')
+                else:  # player did not get ASAFed
                     if self.table_score[player] > Constants.GAME_OVER:  # player is out
                         print(f'{player.name} score is {self.table_score[player]}, they are out')
                         self.players.remove(player)
                         self.table_score.pop(player)
                         # finishing the whole game
                         if len(self.players) == 1:
-                            print(f'Congrats {self.players[0].name}, you are the winner! I salute you, fame and riches'
-                                  f' coming your way')
+                            print(
+                                f'\nCongrats {self.players[0].name}, you are the winner! I salute you, fame and riches'
+                                f' coming your way')
                             exit(0)  # should end the game here
                     elif self.table_score[player] == Constants.GAME_OVER:  # player has exactly 100 point
                         print(
@@ -134,8 +140,8 @@ class Game:
             if player == self.user:
                 try:
                     #  limited time for user to slapdown
-                    slap = int(inputimeout('press 0 and then Enter to SLAPDOWN THE SHIT OUT OF THEM',
-                                           lambda: random.randint(10, 20)))
+                    slap = int(inputimeout('press 0 and then Enter to SLAPDOWN THE SHIT OUT OF THEM\n',
+                                           10))
                     print(f'slap value is {slap}')
                     if slap == 0:
                         self.discarded_pile.append(player.hand.pop(-1))
@@ -295,7 +301,9 @@ class Game:
                 else:
                     print('Invalid input')
 
-        self.check_for_yaniv(player)
+        new_round_flag = self.check_for_yaniv(player)
+        if new_round_flag:
+            last_card_discarded = self.discarded_pile[-1]
         discard_card()
         draw_card()
         print(f'you finished your turn, your hand: ')
@@ -304,6 +312,8 @@ class Game:
     def npc_turn(self, player):
 
         last_card_discarded = self.discarded_pile[-1]
+        print(f'npc turn starts. last card discarded variable is: {last_card_discarded}')
+        print(f'new round print. last card in the discarded pile is: {self.discarded_pile[-1]}')
 
         def discard_card():
 
@@ -343,11 +353,11 @@ class Game:
             if len(seq_to_discard) >= most_appeared_rank[1]:
                 for i in range(len(seq_to_discard)):
                     print(f'{player.name} discards: {seq_to_discard[i]} of {consecutive_suit}')
-                    template_of_card_to_delete = Card(consecutive_suit, seq_to_discard[0])
+                    card_obj_to_discard = Card(consecutive_suit, Card.card_value.get(seq_to_discard[i]))
                     for card in player.hand:
-                        card_to_delete = card if card == template_of_card_to_delete else None
-                    self.discarded_pile.append(card_to_delete)
-                    player.hand.remove(card_to_delete)
+                        if card == card_obj_to_discard:
+                            self.discarded_pile.append(card)
+                            player.hand.remove(card)
                 print(f'{player.name} post discard hand is: ')
                 player.show_hand()
             # same rank cards are discarded
@@ -375,7 +385,11 @@ class Game:
                 print(f'{player.name} chose to draw from discarded pile')
                 player.hand.append(last_card_discarded)
                 print(f'{player.name} drew {player.hand[-1]} from discarded pile')
+                print(f'Trying to remove {last_card_discarded} from discarded pile')
+                discarded_pile = [str(card) for card in self.discarded_pile]
+                print(f'discarded pile is: {discarded_pile}')
                 self.discarded_pile.remove(last_card_discarded)
+                print('removing card from discarded pile was successful')
             else:  # random draw from 1: deck or 2: discarded pile
                 r = random.randint(1, 2)
                 if r == 1:
@@ -387,9 +401,15 @@ class Game:
                     print(f'{player.name} chose to draw from discarded pile')
                     player.hand.append(last_card_discarded)
                     print(f'{player.name} drew {player.hand[-1]} from discarded pile')
+                    print(f'Trying to remove {last_card_discarded} from discarded pile')
+                    discarded_pile = [str(card) for card in self.discarded_pile]
+                    print(f'discarded pile is: {discarded_pile}')
                     self.discarded_pile.remove(last_card_discarded)
+                    print('removing card from discarded pile was successful')
 
-        self.check_for_yaniv(player)
+        new_round_flag = self.check_for_yaniv(player)
+        if new_round_flag:
+            last_card_discarded = self.discarded_pile[-1]
         discard_card()
         draw_card()
         print(f'{player.name} finished their turn, their hand:')
