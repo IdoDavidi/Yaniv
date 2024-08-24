@@ -19,6 +19,7 @@ class Player:
 
     def show_hand(self):
         print([str(card) for card in self.hand])
+        print('')  # one line to separate for better visual
 
     def __str__(self):
         player_hand = ', '.join(str(card) for card in self.hand)

@@ -55,17 +55,17 @@ class Game:
     def check_for_yaniv(self, player):
         total = sum(card.value for card in player.hand)
         if total <= Constants.YANIV:
-            # debugging
-            print(f'\n{player.name} has a total hand value of {total} with:')
-            player.show_hand()
             while True and player == self.user:
+                print(f'\n{player.name} has a total hand value of {total} with:')
+                player.show_hand()
                 call = input('Do you wish to call YANIV? Y/N\n').upper()
                 if call == 'Y':
                     print(f'\nYANIV! \tSUCK IT! \n{player.name} has total hand value of {total}')
                     winner, asaf_flag, asafed = self.check_for_asaf(player, total)
                     self.end_round(winner, asaf_flag, asafed)
                     self.new_round()
-                    return True  # use break
+                    print('\nNew round began')
+                    return True
                 elif call == 'N':
                     break
                 else:
@@ -76,8 +76,7 @@ class Game:
                 winner, asaf_flag, asafed = self.check_for_asaf(player, total)
                 self.end_round(winner, asaf_flag, asafed)
                 self.new_round()
-                print(f'new round. last card in the discarded pile is: {self.discarded_pile[-1]}')
-                return True # was empty line
+                return True
 
     def check_for_asaf(self, yaniv_caller, yaniv_caller_hand_score):
         lowest_score = yaniv_caller_hand_score
@@ -126,8 +125,8 @@ class Game:
                             exit(0)  # should end the game here
                     elif self.table_score[player] == Constants.GAME_OVER:  # player has exactly 100 point
                         print(
-                            f'{player.name} score is exactly a {self.table_score[player]}, their score is cut by half to'
-                            f' {Constants.CUT_BY_HALF}')
+                            f'{player.name} score is exactly {self.table_score[player]}, therefore their score is cut '
+                            f'by half to {Constants.CUT_BY_HALF}')
                         self.table_score[player] = Constants.CUT_BY_HALF
                     else:  # player has less than 100 points
                         print(f'{player.name} score is {self.table_score[player]}')
@@ -136,14 +135,13 @@ class Game:
 
     def slapdown_option(self, player, card_drew, recent_card_in_discarded_pile):
         if card_drew.eq_ranks(recent_card_in_discarded_pile):
-            print('\nslapdown is optional')
             if player == self.user:
                 try:
+                    print('\nslapdown is optional')
                     #  limited time for user to slapdown
-                    timeout_val = random.randint(2, 5)
+                    timeout_val = random.randint(Constants.SLAPDOWN_MIN_TIME, Constants.SLAPDOWN_MAX_TIME)
                     slap = int(inputimeout('press 0 and then Enter to SLAPDOWN THE SHIT OUT OF THEM\n',
                                            timeout_val))
-                    print(f'slap value is {slap}')
                     if slap == 0:
                         self.discarded_pile.append(player.hand.pop(-1))
                         print(f"{player.name} SLAPPED THE SHIT OUT OF Y'ALL")
@@ -205,7 +203,7 @@ class Game:
                     id_card_to_discard = int(input(f'Please choose a card to discard: {hand}\n'))
                     if 0 <= id_card_to_discard <= len(hand):
                         chosen_card = hand[id_card_to_discard][1]
-                        print(f'you chose to discard: {chosen_card}')
+                        print(f'{player.name} chose to discard: {chosen_card}')
                         chosen_card_obj = Card.from_string_to_card(chosen_card)
                         appending_card_to_discarded_pile_and_removing_card_from_player_hand(chosen_card_obj,
                                                                                             id_card_to_discard)
@@ -280,20 +278,15 @@ class Game:
                         print('Invalid choice')
 
         def draw_card():
-            # debugging
-            print(f'last card {player.name} discarded is: {self.discarded_pile[-1]}')
             print(f'{player.name} current hand is:')
             player.show_hand()
             print(f'Last card discarded: {last_card_discarded}')
             while True:
                 choose_deck = int(input('Press 1 to draw card from the deck or 2 to draw the last discarded card\n'))
                 if choose_deck == 1:
-                    while not player.hand[-1].eq_ranks(self.discarded_pile[-1]):  # added in branch. player draws
-                        # until he can slapdown
-                        player.draw(self.deck)
+                    player.draw(self.deck)
                     print(f'you drew: {player.hand[-1]} from deck')
                     #  slapdown option
-
                     self.slapdown_option(player, player.hand[-1], self.discarded_pile[-1])
                     break
                 elif choose_deck == 2:
@@ -316,30 +309,23 @@ class Game:
     def npc_turn(self, player):
 
         last_card_discarded = self.discarded_pile[-1]
-        print(f'npc turn starts. last card discarded variable is: {last_card_discarded}')
-        print(f'new round print. last card in the discarded pile is: {self.discarded_pile[-1]}')
 
         def discard_card():
 
-            print(f'\n{player.name} initial hand is:')
-            player.show_hand()
+            print(f'\n{player.name} turn starts.')
             # first option: multiple cards with same rank
             rank_ascended_sorted_hand = sorted(list(card.value for card in player.hand))
-            print(f'{player.name} ascended sorted hand is: {rank_ascended_sorted_hand}')
             count_rank_dic = defaultdict(int)
             for rank in rank_ascended_sorted_hand:
                 count_rank_dic[rank] += 1
             most_appeared_rank = (max(count_rank_dic.items(), key=lambda item: (item[1], item[0])))
-            print(
-                f'{player.name} most appeared card rank is {most_appeared_rank[0]}, '
-                f'it appears {most_appeared_rank[1]} times')
+
             # second option: consecutive cards with the same suit
             consecutive_suit = ''
             check_consecutive_dict = defaultdict(list)
             seq_to_discard = []
             for card in player.hand:
                 check_consecutive_dict[card.suit].append(card.value)
-            print(f'suit dictionary: {check_consecutive_dict}')
             for suit in check_consecutive_dict:
                 check_consecutive_dict[suit].sort()
                 values = check_consecutive_dict[suit]
@@ -351,7 +337,6 @@ class Game:
                                 seq_to_discard.append(values[i + 3])
                                 if i + 4 < len(values) and values[i + 4] == values[i] + 4:
                                     seq_to_discard.append(values[i + 4])
-                    print(f'sequel to discard: {seq_to_discard} of {suit}')
                     consecutive_suit = suit
             # 3 or more consecutive cards with same suit are discarded
             if len(seq_to_discard) >= most_appeared_rank[1]:
@@ -362,8 +347,7 @@ class Game:
                         if card == card_obj_to_discard:
                             self.discarded_pile.append(card)
                             player.hand.remove(card)
-                print(f'{player.name} post discard hand is: ')
-                player.show_hand()
+
             # same rank cards are discarded
             elif most_appeared_rank[1] > 1:
                 for card in player.hand[:]:  # creates a shallow copy to iterate over
@@ -371,50 +355,37 @@ class Game:
                         print(f'{player.name} discards {card}')
                         self.discarded_pile.append(card)
                         player.hand.remove(card)
-                print(f'{player.name} post discard hand is: ')
-                player.show_hand()
+
             # a single card is discarded
             else:
                 max_card = max(player.hand, key=lambda card: card.value)
                 print(f'{player.name} discards {max_card}')
                 self.discarded_pile.append(max_card)
                 player.hand.remove(max_card)
-                print(f'{player.name} post discard hand is: ')
-                player.show_hand()
 
         def draw_card():
             recent_card_discarded_this_turn = self.discarded_pile[-1]
-            print(f'last card in the discarded pile: {last_card_discarded}')
-            if last_card_discarded.value in list(card.value for card in player.hand):
+            if last_card_discarded.value in list(card.value for card in player.hand):  # NPC has a card with
+                # identical rank to the last card in the discarded pile
                 print(f'{player.name} chose to draw from discarded pile')
                 player.hand.append(last_card_discarded)
                 print(f'{player.name} drew {player.hand[-1]} from discarded pile')
-                print(f'Trying to remove {last_card_discarded} from discarded pile')
-                discarded_pile = [str(card) for card in self.discarded_pile]
-                print(f'discarded pile is: {discarded_pile}')
                 self.discarded_pile.remove(last_card_discarded)
-                print('removing card from discarded pile was successful')
+
             else:  # random draw from 1: deck or 2: discarded pile
                 r = random.randint(1, 2)
                 if r == 1:
                     print(f'{player.name} chose to draw from deck')
                     player.draw(self.deck)
-                    print(f'{player.name} drew {player.hand[-1]} from deck')
                     self.slapdown_option(player, player.hand[-1], recent_card_discarded_this_turn)
                 else:
                     print(f'{player.name} chose to draw from discarded pile')
                     player.hand.append(last_card_discarded)
-                    print(f'{player.name} drew {player.hand[-1]} from discarded pile')
-                    print(f'Trying to remove {last_card_discarded} from discarded pile')
-                    discarded_pile = [str(card) for card in self.discarded_pile]
-                    print(f'discarded pile is: {discarded_pile}')
                     self.discarded_pile.remove(last_card_discarded)
-                    print('removing card from discarded pile was successful')
 
         new_round_flag = self.check_for_yaniv(player)
         if new_round_flag:
             last_card_discarded = self.discarded_pile[-1]
         discard_card()
         draw_card()
-        print(f'{player.name} finished their turn, their hand:')
-        player.show_hand()
+
