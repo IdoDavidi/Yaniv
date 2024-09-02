@@ -1,15 +1,16 @@
 Welcome aboard to a game of Yaniv! these instructions apply to male and female as one :)
-Each player begins of 5 cards, and the goal is to have total hand value of 5 or less.
+Each player begins of 5 cards, and the goal is to have total hand value of 7 or less.
 every turn a player discards cards in the following manner:
 either a single card, a multiple cards with the same rank, or a 3 or more consecutive cards in the same suit and ascending order (e.g 5-6-7 where 5 is discarded first, 6 second and 7 third)
-afterwards a player draws a card from the deck or from the discarded pile.
+Afterward a player draws a card from the deck or from the discarded pile.
 if players draws card from the deck in the same rank as the last card he discarded, they may "SLAPDOWN": discarding the card they just drew in condition that the next player did not start his turn yet.
-Once a player reached a total hand value of 5 or less they may declare YANIV on their turn. 
+Once a player reached a total hand value of 7 or less they may declare YANIV on their turn.
 if successful - all the current total hand values of each player will be added to their score table besides the caller.
-However, if a counter ASAF is called by a different player in response, it means that player has lower hand, in which case the YANIV caller gets 30 points addition to his score.
-A player with a score of over 100 is out, last player wins the game.
-if a player has a score of exactly a 100 points, he score cuts down by half to 50.
+However, if a counter ASAF is called by a different player in response, it means that player has equal or lower hand, in which case the YANIV caller gets 30 points addition to his score.
+A player with a score of over 50 is out, last player wins the game.
+if a player has a score of exactly 50, their score cuts down by half to 25.
 
 important notes:
-- JOKER and ACE values are 0 and 1 respectively, and they are not consecutive to any other card.
+- JOKER and ACE values are 0 and 1 respectively. JOKER cannot be a part of consecutive discarding.
+- royalty a.k.a Jack, Queen, King values are: 11, 12, 13 accordingly.
  

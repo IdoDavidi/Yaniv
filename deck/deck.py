@@ -1,4 +1,4 @@
-from Card import Card
+from card import Card
 import random
 
 
@@ -16,7 +16,7 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.deck)
 
-    # this method removes the card and the end of the end (first card if the deck faces down) and returns it
+    # this method removes the card from the top of the deck and returns it
     def draw(self):
         return self.deck.pop(0)
 
@@ -28,3 +28,8 @@ class Deck:
             count += 1
         print(count)
         return res
+
+
+if __name__ == '__main__':
+    deck = Deck()
+    print(deck)

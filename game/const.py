@@ -1,0 +1,21 @@
+class const:
+    INITIAL_HAND_SIZE = 5
+    YANIV = 7
+    GAME_OVER_POINTS = 50
+    MIN_AMOUNT_OF_PLAYERS = 2
+    MAX_AMOUNT_OF_PLAYERS = 7
+    MAX_HAND_VALUE = 13 * 5
+    CUT_BY_HALF = GAME_OVER_POINTS // 2
+    ASAF_PENALTY_POINTS = 30
+    SLAPDOWN_MIN_TIME = 1
+    SLAPDOWN_MAX_TIME = 3
+    ZERO = 0
+    YES = 'Y'
+    NO = 'N'
+    INVALID_INPUT = 'Invalid input. must be y/n'
+    INDX_ERROR = 'Invalid input. index out of index'
+    VALUE_ERROR = 'Invalid input. not an integer'
+    PLAYER_DECLARES_YANIV_MSG = '\nYANIV! \tSUCK IT! \n{player_name} has total hand value of {total_val}'
+    GAME_FINISHED_MSG = '\nCongrats {winner}, you are the winner! I salute you, fame and riches coming your way'
+    WRONG_VALUE_ERROR = 'Invalid input: chosen card does not match the expected value.'
+    WRONG_SUIT_ERROR = 'Invalid input: chosen card does not match the expected suit.'
